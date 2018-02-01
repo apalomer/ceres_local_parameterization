@@ -13,3 +13,16 @@ target_link_libraries(point_to_plane_functor
     plane
 )
 
+# 2D point distance function
+add_library(distcostfunction SHARED distcostfunction.cpp)
+target_link_libraries(distcostfunction
+    point2d
+)
+
+# Polynomial cost function
+add_library(polynomialcostfuntion SHARED polynomialcostfuntion.cpp)
+target_link_libraries(polynomialcostfuntion
+    point2d
+    polynomial
+)
+

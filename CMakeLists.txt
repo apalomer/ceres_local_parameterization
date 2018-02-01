@@ -39,12 +39,35 @@ include_directories(${EIGEN_INCLUDE_DIR})
 add_definitions(${EIGEN_DEFINITIONS})
 
 # PCL
-find_package(PCL)
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
-if(${PCL_FOUND})
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOMPILE_PCL")
+option(USE_PCL "Use pcl if available" OFF)
+if(${USE_PCL})
+    find_package(PCL)
+    include_directories(${PCL_INCLUDE_DIRS})
+    link_directories(${PCL_LIBRARY_DIRS})
+    add_definitions(${PCL_DEFINITIONS})
+    if(${PCL_FOUND})
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOMPILE_PCL")
+    endif()
+endif()
+
+# Qt
+option(USE_QT "Use qt if available" OFF)
+if(${USE_QT})
+    find_package(Qt4)
+    if(${QT_FOUND})
+        include(${QT_USE_FILE})
+        add_definitions(${QT_DEFINITIONS})
+    endif()
+
+    # CustomPlot
+    find_package(QCustomPlot)
+    include_directories(${QCustomPlot_INCLUDE_DIRS})
+    if(${QT_FOUND})
+        if(QCustomPlot_LIBRARIES)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCOMPILE_QT")
+            set(COMPILE_QT ON)
+        endif()
+    endif()
 endif()
 
 #####################################################################################

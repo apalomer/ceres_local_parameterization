@@ -17,7 +17,6 @@ add_executable(fit_line fit_line.cpp)
 target_link_libraries(fit_line
     glog
     ceres
-    ${PCL_LIBRARIES}
     exception
     functions
     point
@@ -27,6 +26,24 @@ target_link_libraries(fit_line
 )
 if(${PCL_FOUND})
     target_link_libraries(fit_line
+        ${PCL_LIBRARIES}
         line_fit_iterator_viewer
+    )
+endif()
+
+# Plane parameterization
+add_executable(closest_point_on_polynomial closest_point_on_polynomial.cpp)
+target_link_libraries(closest_point_on_polynomial
+    glog
+    ceres
+    point2d
+    polynomial
+    distcostfunction
+    polynomialcostfuntion
+)
+if(${COMPILE_QT})
+    target_link_libraries(closest_point_on_polynomial
+        ${QCustomPlot_LIBRARIES}
+        ${QT_LIBRARIES}
     )
 endif()
