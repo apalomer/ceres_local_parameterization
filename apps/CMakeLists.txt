@@ -40,6 +40,7 @@ target_link_libraries(closest_point_on_polynomial
     polynomial
     distcostfunction
     polynomialcostfuntion
+    polynomial_parameterization
 )
 if(${COMPILE_QT})
     target_link_libraries(closest_point_on_polynomial

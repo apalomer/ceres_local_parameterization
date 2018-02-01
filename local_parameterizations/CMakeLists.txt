@@ -13,3 +13,9 @@ target_link_libraries(plane_parameterization
     ceres
 )
 
+# Plane local parameterization
+add_library(polynomial_parameterization SHARED polynomialparameterization.cpp)
+target_link_libraries(polynomial_parameterization
+    glog
+    ceres
+)
