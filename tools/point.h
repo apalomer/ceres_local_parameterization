@@ -6,6 +6,9 @@
 #include <pcl/point_types.h>
 #endif
 
+// Eigen
+#include <Eigen/Dense>
+
 // Local
 #include "tools/exception.h"
 

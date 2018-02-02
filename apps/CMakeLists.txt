@@ -6,8 +6,6 @@ target_link_libraries(fit_plane
     ceres
     exception
     functions
-    point
-    plane
     point_to_plane_functor
     plane_parameterization
 )
@@ -19,10 +17,7 @@ target_link_libraries(fit_line
     ceres
     exception
     functions
-    point
-    line
     point_to_line_functor
-    line_parameterization
 )
 if(${PCL_FOUND})
     target_link_libraries(fit_line
@@ -36,8 +31,6 @@ add_executable(closest_point_on_polynomial closest_point_on_polynomial.cpp)
 target_link_libraries(closest_point_on_polynomial
     glog
     ceres
-    point2d
-    polynomial
     distcostfunction
     polynomialcostfuntion
     polynomial_parameterization

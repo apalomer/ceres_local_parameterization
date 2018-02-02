@@ -240,7 +240,7 @@ public:
         return Line(this->vector().normalize(),this->point());
     }
 
-    Point<T> closestPoint(Point<T> p = Point<T>(0,0,0))
+    Point<T> closestPoint(Point<T> p = Point<T>(T(0),T(0),T(0)))
     {
         // Vector from line to point
         Point<T> line_to_point = p - point();
