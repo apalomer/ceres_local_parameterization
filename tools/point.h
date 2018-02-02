@@ -25,6 +25,12 @@ public:
         deallocate();
     }
 
+    Point(const Eigen::Matrix<T,3,1>& point): m_owns_data(false)
+    {
+        allocate();
+        fromEigen(point);
+    }
+
     Point(const Point& other): m_owns_data(false)
     {
         allocate();
@@ -86,7 +92,7 @@ public:
         m_data[X] = x;
     }
 
-    void setY(T Y)
+    void setY(T y)
     {
         checkInitialized();
         m_data[Y] = y;
@@ -96,6 +102,25 @@ public:
     {
         checkInitialized();
         m_data[Z] = z;
+    }
+
+    void set(const Eigen::Matrix<T,3,1>& point)
+    {
+        checkInitialized();
+        setX(point(0,0));
+        setY(point(1,0));
+        setZ(point(2,0));
+    }
+
+    void fromEigen(const Eigen::Matrix<T,3,1>& point)
+    {
+        set(point);
+    }
+
+    Eigen::Matrix<T,3,1> toEigen()
+    {
+        checkInitialized();
+        return Eigen::Matrix<T,3,1>(x(),y(),z());
     }
 
     void set(T const* data)
@@ -208,7 +233,7 @@ public:
         return out;
     }
 
-    friend Point operator*(Point& lhs, T scale)
+    friend Point operator*(const Point& lhs, T scale)
     {
         Point out(lhs);
         out *= scale;
@@ -277,12 +302,22 @@ private:
     bool m_owns_data;
 };
 
-
 template<typename T>
 std::ostream& operator<<(std::ostream& out, const Point<T>& p)
 {
     out<<"["<<p.x()<<","<<p.y()<<","<<p.z()<<"]";
     return out;
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& in, Point<T>& point)
+{
+    double x,y,z;
+    in>>x>>y>>z;
+    point.setX(x);
+    point.setY(y);
+    point.setZ(z);
+    return in;
 }
 
 #endif // POINT_H

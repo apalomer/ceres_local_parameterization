@@ -1,5 +1,11 @@
-#include "line_parameterization.h"
 
+// Eigen
+#include <Eigen/Dense>
+
+// Local
+#include "line_parameterization.h"
+#include "tools/point.h"
+#include "tools/line.h"
 
 LineParameterization::LineParameterization()
 {
@@ -9,31 +15,30 @@ LineParameterization::~LineParameterization() {}
 
 bool LineParameterization::Plus(const double* x,const double* delta,double* x_plus_delta) const {
 
-    // Line vector
-    ceres::HomogeneousVectorParameterization hvp(3);
-    hvp.Plus(x,delta,x_plus_delta);
+    // Get closest point to origin
+    Line<double> line(x);
+    double r,roll,pitch,yaw;
+    line.to4parameters(r,roll,pitch,yaw);
 
-    // Line point
-    x_plus_delta[3] = x[3] + delta[2];
-    x_plus_delta[4] = x[4] + delta[3];
-    x_plus_delta[5] = x[5] + delta[4];
+    // Apply increments
+    line.from4parameters(r+delta[0],roll+delta[1],pitch+delta[2],yaw+delta[3]);
+
+    // Set to x_plus_delta
+    Point<double> vector = line.vector();
+    Point<double> point = line.point();
+    x_plus_delta[Line<double>::V_X] = vector.x();
+    x_plus_delta[Line<double>::V_Y] = vector.y();
+    x_plus_delta[Line<double>::V_Z] = vector.z();
+    x_plus_delta[Line<double>::P_X] = point.x();
+    x_plus_delta[Line<double>::P_Y] = point.y();
+    x_plus_delta[Line<double>::P_Z] = point.z();
+
+    // Exit
     return true;
 }
 
 bool LineParameterization::ComputeJacobian(const double* x, double* jacobian) const{
-    ceres::HomogeneousVectorParameterization hvp(3);
-    double hvpj[6];
-    hvp.ComputeJacobian(x,hvpj);
-    for (int i = 0;i<30;i++)jacobian[i] = 0;
-    jacobian[0] = hvpj[0];
-    jacobian[1] = hvpj[1];
-    jacobian[5] = hvpj[2];
-    jacobian[6] = hvpj[3];
-    jacobian[10] = hvpj[4];
-    jacobian[11] = hvpj[5];
-    jacobian[17] = 1;
-    jacobian[23] = 1;
-    jacobian[29] = 1;
+    for (int i = 0;i<18;i++)jacobian[i] = 0;
     return true;
 }
 
@@ -43,5 +48,5 @@ int LineParameterization::GlobalSize() const
 }
 int LineParameterization::LocalSize() const
 {
-    return 5;
+    return 4;
 }

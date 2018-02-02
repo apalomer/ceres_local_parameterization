@@ -1,8 +1,17 @@
 #ifndef LINE_H
 #define LINE_H
 
+#include <Eigen/Dense>
+
+#ifdef COMPILE_PCL
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#endif
+
 #include "tools/exception.h"
 #include "tools/point.h"
+#include "tools/functions.h"
 
 template<typename T>
 class Line
@@ -132,18 +141,6 @@ public:
         return Point<T>(ptr);
     }
 
-    T distance(const Point<T>& x)
-    {
-        checkInitialized();
-        const Point<T> x_1 = point();
-        const Point<T> x_2 = point()+vector();
-        Point<T> v_0 = x - x_1;
-        Point<T> v_1 = x - x_2;
-        Point<T> v_3 = v_0.cross(v_1);
-
-        return v_3.mod()/vector().mod();
-    }
-
     T* data()
     {
         checkInitialized();
@@ -241,6 +238,92 @@ public:
     Line normalize() const
     {
         return Line(this->vector().normalize(),this->point());
+    }
+
+    Point<T> closestPoint(Point<T> p = Point<T>(0,0,0))
+    {
+        // Vector from line to point
+        Point<T> line_to_point = p - point();
+
+        // Project on the line
+        T pr = line_to_point.dot(vector().normalize());
+
+        // Get point
+        return (vector().normalize()*pr) + point();
+    }
+
+    Point<T> pointError(Point<T> p = Point<T>(0,0,0))
+    {
+        return p - closestPoint(p);
+    }
+
+    T distance(const Point<T>& x)
+    {
+        checkInitialized();
+        return (closestPoint(x) - x).mod();
+    }
+
+    void from4parameters(T r, T roll, T pitch, T yaw)
+    {
+        // Line
+        std::cout<<"Line: "<<r<<","<<todeg(yaw)<<","<<todeg(pitch)<<","<<todeg(roll)<<std::endl;
+/*
+        // Create unit vectors
+        Eigen::Matrix<T,3,1> unit_z = Eigen::Matrix<T,3,1>::UnitZ();
+        Eigen::Matrix<T,3,1> unit_y = Eigen::Matrix<T,3,1>::UnitY();
+        Eigen::Matrix<T,3,1> unit_x = Eigen::Matrix<T,3,1>::UnitX();
+
+        // Create rotations 0
+        Eigen::Matrix<T,3,3> rot_yaw = Eigen::AngleAxis<T>(yaw,unit_z).toRotationMatrix();
+        Eigen::Matrix<T,3,3> rot_pitch = Eigen::AngleAxis<T>(pitch,unit_y).toRotationMatrix();
+        Eigen::Matrix<T,3,3> rot_roll = Eigen::AngleAxis<T>(roll,unit_x).toRotationMatrix();
+
+        // Closest point
+        Eigen::Matrix<T,3,1> point_0(r,T(0),T(0));
+        Eigen::Matrix<T,3,1> point_1 = rot_pitch*point_0;
+        Eigen::Matrix<T,3,1> point_2 = rot_yaw*point_1;
+        setPoint(Point<T>(point_2));
+
+        // Vector
+        Eigen::Matrix<T,3,1> vec;
+        Eigen::Matrix<T,3,3> mrt1 = rot_yaw*rot_pitch*rot_roll;
+        vec = mrt1*unit_z;
+        setVector(vec);
+        */
+
+        // Closest point
+        Eigen::Matrix<T,3,1> point_0(r,T(0),T(0));
+        Eigen::Matrix<T,3,1> point_1 = mrot(T(0),pitch,yaw)*point_0;
+        setPoint(Point<T>(point_1));
+
+        // Vector
+        Eigen::Matrix<T,3,1> vec;
+        vec = mrot(roll,pitch,yaw)*Eigen::Matrix<T,3,1>::UnitZ();
+        setVector(vec);
+    }
+
+    void to4parameters(T& r, T& roll, T& pitch, T& yaw)
+    {
+        // compute radious
+        r = closestPoint().mod();
+
+        // Get z directiron
+        Eigen::Matrix<T,3,1> unit_z = vector().toEigen();
+
+        // Get x direction
+        Eigen::Matrix<T,3,1> unit_x = closestPoint().normalize().toEigen();
+
+        // Get y direction
+        Eigen::Matrix<T,3,1> unit_y = unit_z.cross(unit_x);
+
+        // Rotation matrix
+        Eigen::Matrix<T,3,3> mrt;
+        mrt.col(0) = unit_x;
+        mrt.col(1) = unit_y;
+        mrt.col(2) = unit_z;
+
+        // Compute rotations
+        getrpy(mrt,roll,pitch,yaw);
     }
 
 protected:
