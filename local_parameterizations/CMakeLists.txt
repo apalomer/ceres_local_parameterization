@@ -1,6 +1,6 @@
 
 # Line local parameterization
- add_custom_target(line_parameterization SHARED line_parameterization.h)
+ add_custom_target(line_parameterization SOURCES line_parameterization.h)
 target_link_libraries(line_parameterization
     glog
     ceres
