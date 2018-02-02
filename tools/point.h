@@ -150,7 +150,11 @@ public:
 
     T mod() const
     {
-        return sqrt(mod2());
+        T md2 = mod2();
+        if (md2 == T(0))
+            return T(0);
+        else
+            return sqrt(mod2());
     }
 
     Point cross(const Point& other) const

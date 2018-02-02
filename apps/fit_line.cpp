@@ -116,8 +116,8 @@ int main(int argc, char** argv)
 
     // Display base line
     std::cout<<"Line gt: "<<line_gt<<std::endl;
-    std::cout<<"Sampling "<<n_points<<" on line."<<std::endl;
-    std::cout<<"Use local parameterization?"<<(use_line_parameterization?"true":"false")<<std::endl;
+    std::cout<<"Sampling "<<n_points<<" points on line."<<std::endl;
+    std::cout<<"Use local parameterization? "<<(use_line_parameterization?"true":"false")<<std::endl;
 
     // Create problem
     ceres::Problem* problem = new ceres::Problem;

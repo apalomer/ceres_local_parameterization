@@ -247,9 +247,11 @@ public:
 
         // Project on the line
         T pr = line_to_point.dot(vector().normalize());
+        Point<T> projection = vector().normalize()*pr;
 
         // Get point
-        return (vector().normalize()*pr) + point();
+        Point<T> out = projection + point();
+        return out;
     }
 
     Point<T> pointError(Point<T> p = Point<T>(0,0,0))
@@ -265,31 +267,6 @@ public:
 
     void from4parameters(T r, T roll, T pitch, T yaw)
     {
-        // Line
-        std::cout<<"Line: "<<r<<","<<todeg(yaw)<<","<<todeg(pitch)<<","<<todeg(roll)<<std::endl;
-/*
-        // Create unit vectors
-        Eigen::Matrix<T,3,1> unit_z = Eigen::Matrix<T,3,1>::UnitZ();
-        Eigen::Matrix<T,3,1> unit_y = Eigen::Matrix<T,3,1>::UnitY();
-        Eigen::Matrix<T,3,1> unit_x = Eigen::Matrix<T,3,1>::UnitX();
-
-        // Create rotations 0
-        Eigen::Matrix<T,3,3> rot_yaw = Eigen::AngleAxis<T>(yaw,unit_z).toRotationMatrix();
-        Eigen::Matrix<T,3,3> rot_pitch = Eigen::AngleAxis<T>(pitch,unit_y).toRotationMatrix();
-        Eigen::Matrix<T,3,3> rot_roll = Eigen::AngleAxis<T>(roll,unit_x).toRotationMatrix();
-
-        // Closest point
-        Eigen::Matrix<T,3,1> point_0(r,T(0),T(0));
-        Eigen::Matrix<T,3,1> point_1 = rot_pitch*point_0;
-        Eigen::Matrix<T,3,1> point_2 = rot_yaw*point_1;
-        setPoint(Point<T>(point_2));
-
-        // Vector
-        Eigen::Matrix<T,3,1> vec;
-        Eigen::Matrix<T,3,3> mrt1 = rot_yaw*rot_pitch*rot_roll;
-        vec = mrt1*unit_z;
-        setVector(vec);
-        */
 
         // Closest point
         Eigen::Matrix<T,3,1> point_0(r,T(0),T(0));
@@ -311,7 +288,18 @@ public:
         Eigen::Matrix<T,3,1> unit_z = vector().toEigen();
 
         // Get x direction
-        Eigen::Matrix<T,3,1> unit_x = closestPoint().normalize().toEigen();
+        Eigen::Matrix<T,3,1> unit_x;
+        if (r == T(0))
+        {
+            Eigen::Matrix<T,3,1> aux;
+            if ( unit_z == Eigen::Matrix<T,3,1>::UnitZ())
+                aux = Eigen::Matrix<T,3,1>::UnitX();
+            else
+                aux = Eigen::Matrix<T,3,1>::UnitZ();
+            unit_x = aux.cross(unit_z);
+        }
+        else
+            unit_x = closestPoint().normalize().toEigen();
 
         // Get y direction
         Eigen::Matrix<T,3,1> unit_y = unit_z.cross(unit_x);
